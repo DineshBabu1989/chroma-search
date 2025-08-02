@@ -33,8 +33,6 @@ RUN pip install --no-cache-dir openpyxl==3.1.2 requests==2.31.0 tqdm==4.66.1
 
 # Copy application files
 COPY main.py .
-COPY download_model.py .
-COPY test_local_model.py .
 COPY static/ ./static/
 
 # Create directories for data (models will be mounted from host)
