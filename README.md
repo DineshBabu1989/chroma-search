@@ -1,4 +1,4 @@
-# Bosch Brakes Search Assistant
+# Brakes Search Assistant
 
 A semantic search application for brake-related data using FastAPI, ChromaDB, and sentence-transformers. Upload CSV files with brake data and search using natural language queries.
 
