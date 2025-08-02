@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Data - Bosch Brakes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #fafafa;
+            color: #171717;
+            line-height: 1.6;
+        }
+
+        .header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-content {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #171717;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            position: relative;
+        }
+
+        .logo-circle {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #171717;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .logo-circle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 2px;
+            background: #171717;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 16px;
+            background: #171717;
+            transform: translate(-50%, -50%);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-button {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: #171717;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .nav-button.active {
+            background: #171717;
+            color: white;
+            border-color: #171717;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .upload-card {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .upload-card h2 {
+            color: #171717;
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .upload-card p {
+            color: #6b7280;
+            margin-bottom: 1.5rem;
+            font-size: 0.875rem;
+        }
+
+        .file-upload-area {
+            border: 2px dashed #d1d5db;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.2s;
+            cursor: pointer;
+            margin-bottom: 1rem;
+        }
+
+        .file-upload-area:hover {
+            border-color: #171717;
+        }
+
+        .file-upload-area.dragover {
+            border-color: #171717;
+            background: #f9fafb;
+        }
+
+        .upload-icon {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 1rem;
+            color: #6b7280;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-button {
+            padding: 0.875rem 1.5rem;
+            background: #171717;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .upload-button:hover {
+            background: #404040;
+        }
+
+        .upload-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e5e5;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #171717;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .progress-text {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .status-message {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .status-message.success {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+
+        .status-message.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #dc2626;
+        }
+
+        .collections-list {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .collections-list h3 {
+            color: #171717;
+            margin-bottom: 1rem;
+            font-size: 1.25rem;
+        }
+
+        .collection-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .collection-item:last-child {
+            border-bottom: none;
+        }
+
+        .collection-name {
+            font-weight: 500;
+            color: #171717;
+        }
+
+        .collection-count {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .delete-button {
+            padding: 0.25rem 0.5rem;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .delete-button:hover {
+            background: #dc2626;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <div class="logo-icon">
+                    <div class="logo-circle"></div>
+                </div>
+                <div>Bosch Brakes</div>
+            </div>
+            <div class="nav-buttons">
+                <a href="/" class="nav-button">Search</a>
+                <a href="/upload" class="nav-button active">Upload</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="upload-card">
+            <h2>Upload CSV Data</h2>
+            <p>Upload a CSV file with an "Object_Text" column. The system will convert text to embeddings and store them in ChromaDB for semantic search.</p>
+            
+            <div class="file-upload-area" id="uploadArea">
+                <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="7,10 12,15 17,10"/>
+                    <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <p>Drag and drop your CSV file here, or click to browse</p>
+                <input type="file" id="fileInput" class="file-input" accept=".csv">
+            </div>
+            
+            <button class="upload-button" id="uploadButton" disabled>Upload to ChromaDB</button>
+            
+            <div class="progress-container" id="progressContainer">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="progress-text" id="progressText">Processing...</div>
+            </div>
+            
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+
+        <div class="collections-list">
+            <h3>Existing Collections</h3>
+            <div id="collectionsList">
+                <p style="color: #6b7280; font-size: 0.875rem;">Loading collections...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const uploadButton = document.getElementById('uploadButton');
+        const progressContainer = document.getElementById('progressContainer');
+        const progressFill = document.getElementById('progressFill');
+        const progressText = document.getElementById('progressText');
+        const statusMessage = document.getElementById('statusMessage');
+        const collectionsList = document.getElementById('collectionsList');
+
+        let selectedFile = null;
+
+        // File selection
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        fileInput.addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            if (selectedFile) {
+                uploadButton.disabled = false;
+                uploadArea.innerHTML = `
+                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14,2 14,8 20,8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10,9 9,9 8,9"/>
+                    </svg>
+                    <p><strong>${selectedFile.name}</strong> selected</p>
+                    <p style="font-size: 0.875rem; color: #6b7280;">Click upload to process</p>
+                `;
+            }
+        });
+
+        // Drag and drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileInput.dispatchEvent(new Event('change'));
+            }
+        });
+
+        // Upload functionality
+        uploadButton.addEventListener('click', async () => {
+            if (!selectedFile) return;
+
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            uploadButton.disabled = true;
+            progressContainer.style.display = 'block';
+            statusMessage.style.display = 'none';
+
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    showStatus('success', `Successfully uploaded ${result.count} records to collection "${result.collection_name}"`);
+                    loadCollections();
+                } else {
+                    showStatus('error', result.error || 'Upload failed');
+                }
+            } catch (error) {
+                showStatus('error', 'Upload failed: ' + error.message);
+            } finally {
+                uploadButton.disabled = false;
+                progressContainer.style.display = 'none';
+            }
+        });
+
+        function showStatus(type, message) {
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.textContent = message;
+            statusMessage.style.display = 'block';
+        }
+
+        // Load collections
+        async function loadCollections() {
+            try {
+                const response = await fetch('/collections');
+                const collections = await response.json();
+                
+                if (collections.length === 0) {
+                    collectionsList.innerHTML = '<p style="color: #6b7280; font-size: 0.875rem;">No collections found</p>';
+                } else {
+                    collectionsList.innerHTML = collections.map(collection => `
+                        <div class="collection-item">
+                            <div>
+                                <div class="collection-name">${collection.name}</div>
+                                <div class="collection-count">${collection.count} records</div>
+                            </div>
+                            <button class="delete-button" onclick="deleteCollection('${collection.name}')">Delete</button>
+                        </div>
+                    `).join('');
+                }
+            } catch (error) {
+                collectionsList.innerHTML = '<p style="color: #dc2626; font-size: 0.875rem;">Error loading collections</p>';
+            }
+        }
+
+        async function deleteCollection(name) {
+            if (!confirm(`Are you sure you want to delete collection "${name}"?`)) return;
+            
+            try {
+                const response = await fetch(`/collections/${name}`, {
+                    method: 'DELETE'
+                });
+                
+                if (response.ok) {
+                    loadCollections();
+                } else {
+                    alert('Failed to delete collection');
+                }
+            } catch (error) {
+                alert('Error deleting collection: ' + error.message);
+            }
+        }
+
+        // Load collections on page load
+        loadCollections();
+    </script>
+</body>
+</html> 

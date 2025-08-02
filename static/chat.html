@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background-color: #fafafa;
+            color: #171717;
+            line-height: 1.6;
+        }
+
+        .search-header {
+            background: white;
+            border-bottom: 1px solid #e5e5e5;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .search-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+            font-size: 1.25rem;
+            color: #171717;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            position: relative;
+        }
+
+        .logo-circle {
+            width: 32px;
+            height: 32px;
+            border: 2px solid #171717;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .logo-circle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 16px;
+            height: 2px;
+            background: #171717;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-circle::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 16px;
+            background: #171717;
+            transform: translate(-50%, -50%);
+        }
+
+        .logo-text {
+            font-weight: 600;
+            color: #171717;
+        }
+
+        .logo-subtitle {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-weight: 400;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .nav-button {
+            padding: 0.5rem 1rem;
+            background: transparent;
+            color: #171717;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .nav-button:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+
+        .nav-button.active {
+            background: #171717;
+            color: white;
+            border-color: #171717;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.2s;
+            background: #f9fafb;
+        }
+
+        .search-input:focus {
+            border-color: #171717;
+            box-shadow: 0 0 0 3px rgba(23, 23, 23, 0.1);
+            background: white;
+        }
+
+        .search-button {
+            padding: 0.875rem 1.5rem;
+            background: #171717;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .search-button:hover {
+            background: #404040;
+        }
+
+        .search-button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .search-icon {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        .results-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .result-table {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin-bottom: 1rem;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .result-table-header {
+            background: #f9fafb;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .result-table-header h3 {
+            color: #171717;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .result-table-content {
+            overflow-x: auto;
+        }
+
+        .result-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .result-table th {
+            background: #f9fafb;
+            padding: 0.75rem 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.875rem;
+            border-bottom: 1px solid #e5e5e5;
+        }
+
+        .result-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: top;
+        }
+
+        .result-table tr:hover {
+            background: #f9fafb;
+        }
+
+        .similarity-badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            background: #10b981;
+            color: white;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .content-cell {
+            max-width: 400px;
+            word-wrap: break-word;
+        }
+
+        .metadata-cell {
+            max-width: 300px;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .metadata-item {
+            margin-bottom: 0.25rem;
+        }
+
+        .metadata-label {
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #e5e5e5;
+            border-radius: 50%;
+            border-top-color: #171717;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 0.5rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #6b7280;
+        }
+
+        .empty-state h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .empty-state p {
+            font-size: 0.875rem;
+        }
+
+        .welcome-message {
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-message h3 {
+            color: #171717;
+            margin-bottom: 0.5rem;
+        }
+
+        .welcome-message p {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #6b7280;
+            background: white;
+            border: 1px solid #e5e5e5;
+            border-radius: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .search-container {
+                padding: 0 1rem;
+            }
+
+            .results-container {
+                padding: 1rem;
+            }
+
+            .result-table {
+                font-size: 0.875rem;
+            }
+
+            .result-table th,
+            .result-table td {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="search-header">
+        <div class="search-container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <div class="logo-circle"></div>
+                    </div>
+                    <div>
+                        <div class="logo-text">Bosch Brakes</div>
+                        <div class="logo-subtitle">Search Assistant</div>
+                    </div>
+                </div>
+                <div class="nav-buttons">
+                    <a href="/" class="nav-button active">Search</a>
+                    <a href="/upload" class="nav-button">Upload</a>
+                </div>
+            </div>
+            <form class="search-form" id="searchForm">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="searchInput" 
+                    placeholder="Ask about brakes, maintenance, or technical questions..."
+                    autocomplete="off"
+                >
+                <button type="submit" class="search-button" id="searchButton">
+                    <svg class="search-icon" viewBox="0 0 24 24">
+                        <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    Search
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="results-container" id="resultsContainer">
+        <div class="welcome-message">
+            <h3>Welcome to Bosch Brakes Assistant</h3>
+            <p>Ask me anything about brakes, maintenance, technical specifications, or troubleshooting. Upload CSV files with brake data to enable semantic search.</p>
+        </div>
+    </div>
+
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+        Searching...
+    </div>
+
+    <script>
+        const searchForm = document.getElementById('searchForm');
+        const searchInput = document.getElementById('searchInput');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const searchButton = document.getElementById('searchButton');
+        const loading = document.getElementById('loading');
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            // Show loading
+            loading.style.display = 'block';
+            searchButton.disabled = true;
+            resultsContainer.style.display = 'none';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: query })
+                });
+
+                const data = await response.json();
+                
+                // Add search result
+                addSearchResult(query, data.response);
+            } catch (error) {
+                addSearchResult(query, 'Sorry, something went wrong. Please try again.');
+            } finally {
+                loading.style.display = 'none';
+                searchButton.disabled = false;
+                resultsContainer.style.display = 'block';
+                searchInput.focus();
+            }
+        });
+
+        function addSearchResult(query, response) {
+            // Remove welcome message if it exists
+            const welcomeMessage = resultsContainer.querySelector('.welcome-message');
+            if (welcomeMessage) {
+                welcomeMessage.remove();
+            }
+
+            // Parse the response to extract structured data
+            const results = parseResponse(response);
+            
+            const resultDiv = document.createElement('div');
+            resultDiv.className = 'result-table';
+            
+            if (results.length === 0) {
+                resultDiv.innerHTML = `
+                    <div class="no-results">
+                        <h3>No Results Found</h3>
+                        <p>Try rephrasing your question or uploading more data.</p>
+                    </div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="result-table-header">
+                        <h3>Search Results for: "${escapeHtml(query)}"</h3>
+                    </div>
+                    <div class="result-table-content">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th style="width: 100px;">Rank</th>
+                                    <th style="width: 120px;">Similarity</th>
+                                    <th>Content</th>
+                                    <th style="width: 200px;">Additional Info</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${results.map((result, index) => `
+                                    <tr>
+                                        <td><strong>#${index + 1}</strong></td>
+                                        <td>
+                                            <span class="similarity-badge">${result.similarity}</span>
+                                        </td>
+                                        <td class="content-cell">${escapeHtml(result.content)}</td>
+                                        <td class="metadata-cell">
+                                            ${result.metadata ? result.metadata.map(item => 
+                                                `<div class="metadata-item">
+                                                    <span class="metadata-label">${item.key}:</span> ${escapeHtml(item.value)}
+                                                </div>`
+                                            ).join('') : '-'}
+                                        </td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+            }
+            
+            resultsContainer.insertBefore(resultDiv, resultsContainer.firstChild);
+        }
+
+        function parseResponse(response) {
+            const results = [];
+            const lines = response.split('\n');
+            let currentResult = null;
+            
+            for (const line of lines) {
+                if (line.startsWith('**Result')) {
+                    // Save previous result
+                    if (currentResult) {
+                        results.push(currentResult);
+                    }
+                    
+                    // Start new result
+                    const similarityMatch = line.match(/Similarity: ([\d.]+)%/);
+                    const similarity = similarityMatch ? similarityMatch[1] + '%' : 'N/A';
+                    
+                    currentResult = {
+                        similarity: similarity,
+                        content: '',
+                        metadata: []
+                    };
+                } else if (line.startsWith('Additional info:')) {
+                    const metadataStr = line.replace('Additional info: ', '');
+                    const metadataItems = metadataStr.split(', ');
+                    
+                    currentResult.metadata = metadataItems.map(item => {
+                        const [key, value] = item.split(': ');
+                        return { key: key.trim(), value: value.trim() };
+                    });
+                } else if (line.trim() && !line.startsWith('**') && !line.startsWith('Additional info:')) {
+                    if (currentResult) {
+                        currentResult.content += line.trim() + ' ';
+                    }
+                }
+            }
+            
+            // Add the last result
+            if (currentResult) {
+                results.push(currentResult);
+            }
+            
+            return results;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Focus input on load
+        searchInput.focus();
+    </script>
+</body>
+</html> 
